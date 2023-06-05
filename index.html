@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>画像に情報を追加するアプリ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&display=swap');
+
+    body {
+      font-family: 'Zen Old Mincho', serif;
+    }
+
+    #output {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <input type="file" id="imageInput" accept="image/*">
+  <input type="text" id="locationInput" placeholder="位置情報">
+  <button onclick="addInfoToImage()">情報を追加</button>
+  <div id="output"></div>
+
+  <script>
+    function addInfoToImage() {
+      const imageInput = document.getElementById('imageInput');
+      const locationInput = document.getElementById('locationInput');
+      const outputDiv = document.getElementById('output');
+
+      const file = imageInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          const screenWidth = window.innerWidth; // 画面の幅
+          const scaleFactor = screenWidth / img.width; // 縮小倍率
+
+          const canvasWidth = screenWidth;
+          const canvasHeight = img.height * scaleFactor;
+
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
+
+          ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+
+          const fontSize = Math.round(128 * scaleFactor); // フォントサイズを大きくする
+
+          ctx.font = 'bold ' + fontSize + 'px "Zen Old Mincho", serif';
+          ctx.fillStyle = '#FFFFFF'; // 白色に変更
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom'; // テキストのベースラインを下に設定
+
+          const text = locationInput.value;
+          const textWidth = ctx.measureText(text).width;
+
+          const textX = canvasWidth / 2;
+          const textY = canvasHeight - 40; // テキストを少し上に配置
+
+          ctx.fillText(text, textX, textY);
+
+          const outputImage = new Image();
+          outputImage.onload = function() {
+            outputDiv.innerHTML = '';
+            outputDiv.appendChild(outputImage);
+          };
+          outputImage.src = canvas.toDataURL('image/jpeg');
+        };
+        img.src = URL.createObjectURL(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
